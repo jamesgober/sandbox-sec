@@ -23,7 +23,7 @@ Performance is a hard constraint, not a post-delivery optimization pass. All cod
 - MUST minimize heap allocations on hot paths. Prefer stack allocation.
 - MUST pool buffers and reuse memory rather than allocating per-request.
 - Allocation-free hot paths are the goal, not the exception.
-- MUST design for cache locality. Struct layout matters—arrange fields to minimize false sharing and cache misses.
+- MUST design for cache locality. Struct layout matters-arrange fields to minimize false sharing and cache misses.
 - Use `#[inline]` on small, frequently-called functions. Profile before inlining larger functions.
 - MUST benchmark before and after any performance-sensitive change using `criterion`.
 - MUST NOT guess at performance. Measure it. Use profilers (`perf`, `flamegraph`, `cachegrind`) to identify bottlenecks before optimizing.
@@ -36,9 +36,9 @@ Performance is a hard constraint, not a post-delivery optimization pass. All cod
 
 ## Concurrency & Async
 
-Where the project supports concurrency, it MUST be engineered for high-contention workloads from the ground up. Thread safety is REQUIRED for all shared types—it is not optional and cannot be retrofitted. Lock-free approaches SHOULD be used wherever correctness can be proven. Single-writer bottlenecks are an architectural defect.
+Where the project supports concurrency, it MUST be engineered for high-contention workloads from the ground up. Thread safety is REQUIRED for all shared types-it is not optional and cannot be retrofitted. Lock-free approaches SHOULD be used wherever correctness can be proven. Single-writer bottlenecks are an architectural defect.
 
-Where the project supports async I/O, async MUST be a first-class architectural decision, not an incremental addition. The async executor is a shared, finite resource. Blocking it—for any reason—degrades the entire system under load. Blocking I/O within an async context is PROHIBITED.
+Where the project supports async I/O, async MUST be a first-class architectural decision, not an incremental addition. The async executor is a shared, finite resource. Blocking it-for any reason-degrades the entire system under load. Blocking I/O within an async context is PROHIBITED.
 
 - MUST use `tokio` for async runtime.
 - MUST NOT block async contexts under any circumstance. Use `tokio::task::spawn_blocking` to offload blocking operations to a dedicated thread pool.
@@ -56,16 +56,16 @@ Where the project supports async I/O, async MUST be a first-class architectural 
 
 ## Security
 
-Security is a structural requirement, not a release-phase concern. All external input MUST be treated as hostile until explicitly validated. Least-privilege access MUST govern every component boundary—no component SHALL have access beyond what its function strictly requires. Sensitive data MUST be encrypted at rest and in transit without exception. A system that functions correctly but leaks data, permits privilege escalation, or fails a security audit does not meet these standards.
+Security is a structural requirement, not a release-phase concern. All external input MUST be treated as hostile until explicitly validated. Least-privilege access MUST govern every component boundary-no component SHALL have access beyond what its function strictly requires. Sensitive data MUST be encrypted at rest and in transit without exception. A system that functions correctly but leaks data, permits privilege escalation, or fails a security audit does not meet these standards.
 
-- MUST validate and sanitize every input at the system boundary before it touches any internal structure. Reject before accepting—never accept and correct after the fact.
+- MUST validate and sanitize every input at the system boundary before it touches any internal structure. Reject before accepting-never accept and correct after the fact.
 - MUST NOT allow secrets, tokens, credentials, or PII to appear in logs, error messages, panics, or stack traces. Implement redaction filters at the logging boundary.
 - MUST use constant-time comparison for sensitive values (passwords, tokens, keys). Use `subtle::ConstantTimeComparison` or equivalent. Direct `==` on secrets is PROHIBITED.
 - MUST encrypt all sensitive data at rest and in transit. Plaintext sensitive data anywhere in persistent storage or on the wire is PROHIBITED.
-- When encryption is required, MUST use AEAD constructions (ChaCha20-Poly1305 or AES-GCM). Raw symmetric encryption without an authentication tag is PROHIBITED—it provides confidentiality but not integrity.
+- When encryption is required, MUST use AEAD constructions (ChaCha20-Poly1305 or AES-GCM). Raw symmetric encryption without an authentication tag is PROHIBITED-it provides confidentiality but not integrity.
 - Secrets and cryptographic key material MUST be zeroed from memory after use. Use the `zeroize` crate (`Zeroize` trait, `ZeroizeOnDrop` derive) for all types holding sensitive data. Dropping a secret without zeroing leaves it recoverable from memory.
 - MUST use checked, saturating, or wrapping arithmetic explicitly for any security-sensitive or safety-critical integer operations. In release mode, Rust integer overflow wraps silently. For untrusted input, index calculations, size arithmetic, or crypto, this is a vulnerability. Use `checked_add`, `checked_mul`, `saturating_*`, or `wrapping_*` as appropriate.
-- MUST maintain audit trails for all privileged operations. Log who did what and when—without including sensitive content.
+- MUST maintain audit trails for all privileged operations. Log who did what and when-without including sensitive content.
 - MUST keep dependencies up to date. Run `cargo audit` (RustSec advisory database) and `cargo deny check` in CI. Both tools serve distinct purposes and both are REQUIRED.
 - `unsafe` code MUST have explicit safety justification. Use `#[deny(unsafe_op_in_unsafe_fn)]` to enforce that every `unsafe` operation inside an `unsafe fn` requires its own `unsafe {}` block with a `// SAFETY:` annotation.
 - MUST conduct regular security reviews. All findings MUST be addressed before the next release.
@@ -74,12 +74,12 @@ Security is a structural requirement, not a release-phase concern. All external 
 
 ## Architecture
 
-Architecture MUST be designed for long-term maintainability and minimal coupling. Every module, type, and function MUST have a single, clear responsibility. Inter-module dependencies MUST flow through explicit abstractions—concrete implementations are internal details, never dependencies. Code that cannot be unit tested without external services or global state has a structural problem. Observability is not a feature to be added later; it is a REQUIRED property of the system from the first component.
+Architecture MUST be designed for long-term maintainability and minimal coupling. Every module, type, and function MUST have a single, clear responsibility. Inter-module dependencies MUST flow through explicit abstractions-concrete implementations are internal details, never dependencies. Code that cannot be unit tested without external services or global state has a structural problem. Observability is not a feature to be added later; it is a REQUIRED property of the system from the first component.
 
 - MUST follow SOLID principles.
-- MUST follow KISS—the simplest correct solution wins.
-- MUST follow DRY—but MUST NOT abstract until the pattern has been proven at least twice.
-- MUST follow YAGNI—build what is needed now. Design for extension, not speculation.
+- MUST follow KISS-the simplest correct solution wins.
+- MUST follow DRY-but MUST NOT abstract until the pattern has been proven at least twice.
+- MUST follow YAGNI-build what is needed now. Design for extension, not speculation.
 - Modules MUST have a single, focused responsibility. One responsibility per module, per type, per function.
 - MUST use trait-driven design. Depend on abstractions, not concrete implementations.
 - MUST NOT create god structs or god modules.
@@ -93,7 +93,7 @@ Architecture MUST be designed for long-term maintainability and minimal coupling
 
 ## Error Handling
 
-In Rust, errors are values—not exceptions, not panics, and not silently discarded return codes. Every fallible operation MUST return `Result<T, E>`. Library code MUST NOT panic under any recoverable condition. Errors MUST carry sufficient context to identify the failure, locate its origin, and determine the correct recovery path. An error message that only says "failed" is a debug obstruction, not an error type.
+In Rust, errors are values-not exceptions, not panics, and not silently discarded return codes. Every fallible operation MUST return `Result<T, E>`. Library code MUST NOT panic under any recoverable condition. Errors MUST carry sufficient context to identify the failure, locate its origin, and determine the correct recovery path. An error message that only says "failed" is a debug obstruction, not an error type.
 
 - MUST use `Result<T, E>` for all fallible operations. Panics in library code are PROHIBITED. Panics are only acceptable in `main()` or binary entry points during unrecoverable boot failures.
 - MUST define domain-specific error types per module. Using `Box<dyn Error>` in internal APIs is PROHIBITED.
@@ -111,7 +111,7 @@ In Rust, errors are values—not exceptions, not panics, and not silently discar
 
 ## Code Quality
 
-Code quality is enforced mechanically, not aspirationally. All code MUST compile without warnings. All code MUST pass `clippy` at the configured strict profile. Formatting MUST be enforced by `rustfmt` with zero tolerance for deviations. Every commit to the repository is treated as production-ready. There is no "clean up later"—if it is not ready, it does not get committed.
+Code quality is enforced mechanically, not aspirationally. All code MUST compile without warnings. All code MUST pass `clippy` at the configured strict profile. Formatting MUST be enforced by `rustfmt` with zero tolerance for deviations. Every commit to the repository is treated as production-ready. There is no "clean up later"-if it is not ready, it does not get committed.
 
 **Compiler & Lint Configuration:**
 
@@ -135,7 +135,7 @@ All crates MUST include the following at the crate root:
 #![deny(clippy::undocumented_unsafe_functions)]
 ```
 
-Use `#[forbid(...)]` instead of `#[deny(...)]` for lints that downstream crates MUST NOT override. `#[forbid]` is the stronger form—it prevents any downstream or inner scope from suppressing the lint. Reserve `#[deny]` for lints where a documented, scoped `#[allow]` is occasionally justified.
+Use `#[forbid(...)]` instead of `#[deny(...)]` for lints that downstream crates MUST NOT override. `#[forbid]` is the stronger form-it prevents any downstream or inner scope from suppressing the lint. Reserve `#[deny]` for lints where a documented, scoped `#[allow]` is occasionally justified.
 
 Test modules MAY use `#[allow(clippy::unwrap_used)]` at the module level only when unwrapping is genuinely unavoidable (e.g., test setup code where an error cannot be meaningfully handled).
 
@@ -170,7 +170,7 @@ Test modules MAY use `#[allow(clippy::unwrap_used)]` at the module level only wh
 
 ## Testing
 
-Tests are the contract between implementation and requirements. All logic MUST have unit test coverage. All I/O boundaries and cross-module interactions MUST have integration tests. A failing test on any commit MUST block the build without exception. Test coverage targets exist to prevent regressions—not to satisfy a metric. Tests MUST cover failure paths, boundary conditions, and concurrent access scenarios, not just the expected happy path.
+Tests are the contract between implementation and requirements. All logic MUST have unit test coverage. All I/O boundaries and cross-module interactions MUST have integration tests. A failing test on any commit MUST block the build without exception. Test coverage targets exist to prevent regressions-not to satisfy a metric. Tests MUST cover failure paths, boundary conditions, and concurrent access scenarios, not just the expected happy path.
 
 - Unit tests MUST cover all logic. Integration tests MUST cover all I/O boundaries and cross-module interactions.
 - Unit tests MUST live in a `#[cfg(test)]` module at the bottom of each source file. Integration tests MUST live in `tests/`.
@@ -187,10 +187,10 @@ Tests are the contract between implementation and requirements. All logic MUST h
 
 ## Documentation
 
-Documentation is a deliverable, not a finishing step. Every public type, trait, function, and constant MUST have a doc comment before the implementation is considered complete. Doc comments MUST explain behavior and intent—not restate what the type signature already conveys. Documentation MUST be written by a human for a human. AI-generated filler, marketing language, and structural boilerplate have no place in technical documentation.
+Documentation is a deliverable, not a finishing step. Every public type, trait, function, and constant MUST have a doc comment before the implementation is considered complete. Doc comments MUST explain behavior and intent-not restate what the type signature already conveys. Documentation MUST be written by a human for a human. AI-generated filler, marketing language, and structural boilerplate have no place in technical documentation.
 
 - Every public type, trait, function, and constant MUST have a doc comment.
-- Doc comments MUST explain the *why* and the *behavior*—not just the *what*. The signature describes the shape. The doc comment explains the contract: what it does, when to use it, and when not to.
+- Doc comments MUST explain the *why* and the *behavior*-not just the *what*. The signature describes the shape. The doc comment explains the contract: what it does, when to use it, and when not to.
 - MUST include `# Examples` with runnable `\`\`\`rust` code blocks for any non-trivial public API.
 - MUST use `#[deny(missing_docs)]` to enforce documentation on all public items.
 - Documentation MUST read as written by a human. Do not use AI-style patterns:
@@ -199,8 +199,8 @@ Documentation is a deliverable, not a finishing step. Every public type, trait, 
   - No emoji in documentation
   - No "comprehensive", "robust", "seamless", or "leverage"
   - No verification reports or certification blocks
-- Commit messages MUST be imperative, lowercase, concise, with no trailing period. Example: `add error context to parser` — not `Added Exception Context Handling`.
-- Public-facing docs in `docs/` MUST be written for developers integrating with or extending the system. They explain concepts, architecture, and design decisions—not just the API surface.
+- Commit messages MUST be imperative, lowercase, concise, with no trailing period. Example: `add error context to parser` - not `Added Exception Context Handling`.
+- Public-facing docs in `docs/` MUST be written for developers integrating with or extending the system. They explain concepts, architecture, and design decisions-not just the API surface.
 - Internal source-level docs MUST explain rationale and constraints, not just code flow.
 - All `unsafe` code MUST have a `# Safety` section in its doc comment, and a `// SAFETY:` comment on every `unsafe {}` block explaining the invariants being relied upon.
 
@@ -208,7 +208,7 @@ Documentation is a deliverable, not a finishing step. Every public type, trait, 
 
 ## Dependency Management
 
-Every dependency is a liability. Adding a crate imports its entire maintenance history, security posture, transitive dependency graph, and license obligations into the project. No dependency SHALL be added without explicit justification against all of those factors. When functionality can be implemented locally at reasonable cost, it SHOULD be. The default answer to adding a new dependency is no—the requester bears the burden of justification.
+Every dependency is a liability. Adding a crate imports its entire maintenance history, security posture, transitive dependency graph, and license obligations into the project. No dependency SHALL be added without explicit justification against all of those factors. When functionality can be implemented locally at reasonable cost, it SHOULD be. The default answer to adding a new dependency is no-the requester bears the burden of justification.
 
 - Every dependency MUST justify itself. If it can be implemented locally in a reasonable scope, it SHOULD be.
 - Before adding any third-party crate, the following MUST be evaluated:
@@ -228,16 +228,16 @@ Every dependency is a liability. Adding a crate imports its entire maintenance h
 
 ## Workspace & Project Structure
 
-Workspace structure MUST enforce domain boundaries—not merely organize files. Each crate is a unit of ownership, responsibility, and visibility. Coupling between crates MUST flow through declared traits and interfaces. Direct access to another crate's concrete internals is PROHIBITED. A crate's public API is a contract; anything not in that contract is an internal detail and SHALL NOT be depended on externally.
+Workspace structure MUST enforce domain boundaries-not merely organize files. Each crate is a unit of ownership, responsibility, and visibility. Coupling between crates MUST flow through declared traits and interfaces. Direct access to another crate's concrete internals is PROHIBITED. A crate's public API is a contract; anything not in that contract is an internal detail and SHALL NOT be depended on externally.
 
 ```
 project-root/
 ├── crates/
-│   ├── core/           # Shared essentials — cross-cutting types, no business logic
+│   ├── core/           # Shared essentials - cross-cutting types, no business logic
 │   ├── <domain-a>/     # Library crate with focused, bounded responsibility
 │   ├── <domain-b>/     # Another bounded library crate
 │   └── ...
-├── bins/               # Binary/executable crates — depends on crates/, not internals
+├── bins/               # Binary/executable crates - depends on crates/, not internals
 │   ├── <app-a>/
 │   └── <app-b>/
 ├── docs/               # Public documentation
@@ -258,7 +258,7 @@ project-root/
 
 ## Versioning & Semver
 
-All public crates MUST follow semantic versioning strictly. A breaking change—regardless of how minor it appears—MUST result in a MAJOR version increment. Downstream consumers rely on version signals to make safe upgrade decisions. Violating semver is a trust failure with real consequences for anyone depending on the crate.
+All public crates MUST follow semantic versioning strictly. A breaking change-regardless of how minor it appears-MUST result in a MAJOR version increment. Downstream consumers rely on version signals to make safe upgrade decisions. Violating semver is a trust failure with real consequences for anyone depending on the crate.
 
 - MUST use semantic versioning: `MAJOR.MINOR.PATCH`.
 - MAJOR: Breaking API changes, behavioral changes, protocol or schema incompatibilities.
@@ -273,7 +273,7 @@ All public crates MUST follow semantic versioning strictly. A breaking change—
 
 ## Platform-Specific Code
 
-All supported platforms MUST be treated as first-class targets. A codebase that compiles and runs correctly only on the developer's platform is not cross-platform—it is untested everywhere else. Every platform-specific branch MUST have a corresponding test, and no platform MUST be silently degraded without an explicit, documented fallback path.
+All supported platforms MUST be treated as first-class targets. A codebase that compiles and runs correctly only on the developer's platform is not cross-platform-it is untested everywhere else. Every platform-specific branch MUST have a corresponding test, and no platform MUST be silently degraded without an explicit, documented fallback path.
 
 - MUST use `#[cfg(target_os = "...")]` for OS-specific code. Every platform-specific branch MUST have a corresponding test.
 - MUST NOT write bare `#[cfg(unix)]` without a `#[cfg(windows)]` equivalent, and vice versa. Every branch MUST be covered.
@@ -285,7 +285,7 @@ All supported platforms MUST be treated as first-class targets. A codebase that 
 
 ## Observability & Monitoring
 
-A system that cannot be observed cannot be reliably operated or debugged in production. Metrics, structured logs, and trace instrumentation MUST be considered structural requirements—not additions made after deployment reveals problems. Every component MUST expose sufficient telemetry to diagnose failures and measure performance without requiring code changes, restarts, or access to internal state.
+A system that cannot be observed cannot be reliably operated or debugged in production. Metrics, structured logs, and trace instrumentation MUST be considered structural requirements-not additions made after deployment reveals problems. Every component MUST expose sufficient telemetry to diagnose failures and measure performance without requiring code changes, restarts, or access to internal state.
 
 - Every module MUST expose metrics. At minimum: operation counts, error rates, latency distributions, and resource utilization.
 - MUST use structured logging throughout. Use `tracing` for both logging and distributed trace instrumentation.
@@ -300,7 +300,7 @@ A system that cannot be observed cannot be reliably operated or debugged in prod
 
 ## Failure Modes & Degradation
 
-Failures are inevitable. The system MUST be designed to contain them. A failure in one subsystem MUST NOT propagate unchecked into unrelated subsystems. Critical components MUST remain operational when non-critical ones fail. Graceful degradation is the REQUIRED response to unexpected conditions—a total system shutdown from a partial failure is a design defect.
+Failures are inevitable. The system MUST be designed to contain them. A failure in one subsystem MUST NOT propagate unchecked into unrelated subsystems. Critical components MUST remain operational when non-critical ones fail. Graceful degradation is the REQUIRED response to unexpected conditions-a total system shutdown from a partial failure is a design defect.
 
 - MUST identify and document which components are critical vs. non-critical. This classification MUST drive isolation and recovery design.
 - Non-critical component failures MUST NOT crash or halt critical components.
@@ -331,7 +331,7 @@ Memory safety guarantees in Rust eliminate a large class of bugs, but they do no
 
 Builds MUST be reproducible. Given identical source, toolchain, and build parameters, the output MUST be bitwise identical across environments. Non-deterministic builds obscure supply chain integrity, complicate debugging, and undermine confidence in deployed artifacts. Any build behavior that depends on environment state, system timestamps, or runtime randomness is a defect.
 
-- MUST pin the Rust toolchain version in `rust-toolchain.toml` at the workspace root. Documenting the version in a README is insufficient — it MUST be enforced by tooling.
+- MUST pin the Rust toolchain version in `rust-toolchain.toml` at the workspace root. Documenting the version in a README is insufficient - it MUST be enforced by tooling.
 - MUST NOT embed timestamps in compiled artifacts. Use `SOURCE_DATE_EPOCH` in build scripts to enforce a fixed reference time.
 - MUST NOT generate random seeds, UUIDs, or nonces at compile time.
 - MUST NOT have environment-dependent behavior in build scripts. All paths MUST be relative or explicitly passed as input.
@@ -353,7 +353,7 @@ Version control history is documentation. Commit messages MUST communicate inten
 - MUST NOT commit generated files: `target/`, build artifacts, `*.o`, `*.a`, etc. Exception: workspace `Cargo.lock`.
 - MUST NOT commit AI artifacts: directive files, phase documents, planning notes, and verification reports. These MUST remain outside version control.
 - Every meaningful change MUST have a corresponding CHANGELOG entry under `[Unreleased]`.
-- CHANGELOG MUST use proper version linking with dates: `[1.2.0] — 2026-04-24`, with links to diffs.
+- CHANGELOG MUST use proper version linking with dates: `[1.2.0] - 2026-04-24`, with links to diffs.
 - Each commit MUST represent a single logical change. Mixing refactoring with feature work in one commit is PROHIBITED.
 - MUST NOT bypass commit hooks with `--no-verify`. If a hook fails, fix the underlying issue.
 
@@ -361,7 +361,7 @@ Version control history is documentation. Commit messages MUST communicate inten
 
 ## Crate Packaging & Publishing
 
-A published crate is a public contract. All metadata MUST be complete and accurate. All public behavior MUST be documented. All breaking changes MUST be accompanied by a migration path and a corresponding MAJOR version increment. Publishing an incomplete, undocumented, or poorly packaged crate is worse than not publishing—it creates a dependency that consumers cannot reliably use or upgrade.
+A published crate is a public contract. All metadata MUST be complete and accurate. All public behavior MUST be documented. All breaking changes MUST be accompanied by a migration path and a corresponding MAJOR version increment. Publishing an incomplete, undocumented, or poorly packaged crate is worse than not publishing-it creates a dependency that consumers cannot reliably use or upgrade.
 
 - All shippable crates MUST target minimum Rust stable. MSRV MUST be declared in `Cargo.toml` under `rust-version`.
 - MUST include complete crate metadata: `description`, `keywords`, `categories`, `repository`, `license`, `authors`, `homepage`.
@@ -374,7 +374,7 @@ A published crate is a public contract. All metadata MUST be complete and accura
 
 ## CI/CD & Pre-Merge Checklist
 
-No commit SHALL reach the main branch without satisfying every check listed below. These are not suggestions—each item is REQUIRED. Any check that fails MUST block the merge without exception. Bypassing these checks for any reason, including urgency or low perceived risk, is not permitted.
+No commit SHALL reach the main branch without satisfying every check listed below. These are not suggestions-each item is REQUIRED. Any check that fails MUST block the merge without exception. Bypassing these checks for any reason, including urgency or low perceived risk, is not permitted.
 
 ### Required Checks
 
@@ -396,7 +396,7 @@ No commit SHALL reach the main branch without satisfying every check listed belo
 
 ### Coverage & Quality Gates
 
-- [ ] **Code Coverage**: New and modified code MUST have meaningful behavioral test coverage. Target: >80% on new code. Track trends — declining coverage is a warning signal.
+- [ ] **Code Coverage**: New and modified code MUST have meaningful behavioral test coverage. Target: >80% on new code. Track trends - declining coverage is a warning signal.
 - [ ] **No Panics**: Zero new `panic!`, `unwrap()`, or `expect()` in library code. Documented exceptions in binary startup code only.
 - [ ] **No TODOs**: Zero new `todo!()` or `unimplemented!()` without a linked issue.
 - [ ] **No Commented Code**: Zero blocks of commented-out code. Delete or track in a ticket.
@@ -414,7 +414,7 @@ No commit SHALL reach the main branch without satisfying every check listed belo
 
 ## Anti-Patterns: What NOT To Do
 
-The following patterns are explicitly PROHIBITED in REPS-compliant code. Each item describes a practice that either degrades performance, introduces security risk, reduces reliability, or undermines long-term maintainability. These are not style preferences—they are disqualifying defects.
+The following patterns are explicitly PROHIBITED in REPS-compliant code. Each item describes a practice that either degrades performance, introduces security risk, reduces reliability, or undermines long-term maintainability. These are not style preferences-they are disqualifying defects.
 
 ### Performance Anti-Patterns
 
@@ -434,7 +434,7 @@ The following patterns are explicitly PROHIBITED in REPS-compliant code. Each it
 ### Security Anti-Patterns
 
 - **Validate after parse**: Input MUST be validated before or during parsing, not after. Accepting first and correcting second is a vulnerability.
-- **Raw secrets in logs**: Logging error messages that include passwords, tokens, or keys. Redact at the logging boundary—never pass secrets into log macros.
+- **Raw secrets in logs**: Logging error messages that include passwords, tokens, or keys. Redact at the logging boundary-never pass secrets into log macros.
 - **`==` for secret comparison**: Direct equality on secret values is vulnerable to timing side-channels. Use `subtle::ConstantTimeEq` or equivalent.
 - **`panic!` on invalid input**: Panicking in response to bad external input exposes internal details and can be used for denial-of-service. Use `Result` with an appropriate error variant.
 - **Raw symmetric encryption (no AEAD)**: Encrypting without an authentication tag provides confidentiality but not integrity. Encrypted data can be tampered with silently. Use ChaCha20-Poly1305 or AES-GCM.
@@ -450,10 +450,10 @@ The following patterns are explicitly PROHIBITED in REPS-compliant code. Each it
 - **Incomplete match arms on error types**: Handling `Ok` but not `Err`, or some `Err` variants but not all, leaves failure modes untested and unhandled.
 - **Race conditions through unsynchronized shared state**: Shared mutable state accessed from multiple threads without synchronization is undefined behavior in other languages and a logic bug in Rust if `unsafe` is involved. Use channels, `Arc<Mutex<T>>`, or lock-free structures with documented proof.
 - **Off-by-one errors**: Classic boundary bug. MUST test: 0, 1, capacity-1, capacity, capacity+1.
-- **Unreachable or dead code paths**: `match` arms that can never execute, or code branches that are logically impossible. Remove them—they create confusion and hide intent.
+- **Unreachable or dead code paths**: `match` arms that can never execute, or code branches that are logically impossible. Remove them-they create confusion and hide intent.
 - **Hardcoded configuration values**: Timeouts, pool sizes, buffer sizes, and thresholds embedded as literals. These MUST be configurable and MUST be tested with non-default values.
 - **Assuming format or schema stability**: Any serialized, persisted, or transmitted format will eventually need to evolve. Use versioned formats from day one.
-- **No atomicity for multi-step operations**: Any sequence of operations that must succeed or fail together—and that can fail partway through—MUST use transactional, WAL-based, or atomic file-swap semantics. Partial completion is a corruption scenario.
+- **No atomicity for multi-step operations**: Any sequence of operations that must succeed or fail together-and that can fail partway through-MUST use transactional, WAL-based, or atomic file-swap semantics. Partial completion is a corruption scenario.
 - **Panicking inside a `Mutex` lock guard**: A panic while holding a `Mutex` poisons it permanently. All subsequent attempts to acquire the lock will return `Err`. If the locked critical section can panic, the code MUST handle poisoning at every call site, or restructure to avoid panicking under the lock.
 
 ### Architectural Anti-Patterns
@@ -473,17 +473,17 @@ The following patterns are explicitly PROHIBITED in REPS-compliant code. Each it
 
 - **Test-only behavior in production code**: `#[cfg(test)]` blocks that change logic or behavior in non-trivial ways are a test smell. Extract the logic so it can be tested without altering production behavior.
 - **Testing implementation, not behavior**: Tests that assert which internal functions were called, rather than what the observable result is, break on refactoring and provide false confidence. Test what the code produces, not how.
-- **Happy-path-only tests**: Tests that only cover expected inputs are incomplete. Edge cases—empty input, max input, concurrent access, partial failure—are where real bugs live.
+- **Happy-path-only tests**: Tests that only cover expected inputs are incomplete. Edge cases-empty input, max input, concurrent access, partial failure-are where real bugs live.
 - **Mocking everything**: Unit tests that mock the database, filesystem, and network pass in isolation but fail to catch integration-level bugs. Use real I/O in integration tests.
 - **Slow test suites**: A test suite that takes more than a few minutes to run discourages frequent execution and delays feedback. Parallelize, isolate, and use fixtures strategically.
-- **Flaky tests**: Tests that pass or fail non-deterministically indicate a race condition or external dependency. A flaky test is a real bug—it MUST be fixed, not skipped.
+- **Flaky tests**: Tests that pass or fail non-deterministically indicate a race condition or external dependency. A flaky test is a real bug-it MUST be fixed, not skipped.
 - **No concurrency tests**: Single-threaded tests cannot detect race conditions. MUST use `loom` or similar tools for concurrent code paths.
 - **Brittle tests**: Tests that fail because of unrelated changes are tightly coupled to implementation. Write tests against public behavior and contracts, not internal structure.
 
 ### Documentation Anti-Patterns
 
 - **No doc comments**: "The code is self-explanatory" is almost never true six months later. Every public item MUST explain why it exists and how it should be used.
-- **Paraphrasing the signature**: `/// Returns the value` when the return type already says `-> T`. Doc comments MUST explain behavior, contract, and intent—not restate the syntax.
+- **Paraphrasing the signature**: `/// Returns the value` when the return type already says `-> T`. Doc comments MUST explain behavior, contract, and intent-not restate the syntax.
 - **Generic or marketing-style docs**: Descriptions with no concrete information. Documentation is for engineers. Be precise and specific.
 - **No examples on public APIs**: Developers should not have to guess how to use a type or function. Runnable `# Examples` blocks are REQUIRED for non-trivial APIs.
 - **Comments as a band-aid**: `// TODO: this is a hack` or `// fix later` in committed code. Fix it or create a tracked issue. Comments on broken code that remain in the repository are PROHIBITED.
