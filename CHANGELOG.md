@@ -13,9 +13,17 @@
 
 ### Added
 
+- `dev/PLAN.md`: purpose, the mechanism-versus-policy split with shield-sec,
+  the fail-closed contracts, mechanisms per platform, the presets the service
+  stack needs (network-facing, storage, guard), threats, limits, open
+  decisions, and the decision log.
+
 ### Changed
 
 ### Fixed
+
+- `dev/ROADMAP.md`: replaced mis-encoded dash characters and removed the
+  byte-order mark.
 
 ### Security
 
